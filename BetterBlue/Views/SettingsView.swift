@@ -11,6 +11,15 @@ import SwiftUI
 import UIKit
 import WidgetKit
 
+extension Bundle {
+    var releaseVersionNumber: String? {
+        return infoDictionary?["CFBundleShortVersionString"] as? String
+    }
+    var buildVersionNumber: String? {
+        return infoDictionary?["CFBundleVersion"] as? String
+    }
+}
+
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var accounts: [BBAccount]
@@ -134,10 +143,45 @@ struct SettingsView: View {
                     }
                 #endif
 
-                Section("Shameless Self Promotion") {
+                // About section with version and GitHub links
+                Section {
+                    if let version = Bundle.main.releaseVersionNumber, let build = Bundle.main.buildVersionNumber {
+                        HStack {
+                            Label("Version Number", systemImage: "calendar")
+                            Spacer()
+                            Text(version)
+                        }
+                        HStack {
+                            Label("Build Number", systemImage: "swift")
+                            Spacer()
+                            Text(build)
+                        }
+                    }
+
+                    Link(destination: URL(string: "https://github.com/schmidtwmark/BetterBlue")!) {
+                        Label("App Source Code", systemImage: "location.app")
+                    }
+
+                    Link(destination: URL(string: "https://github.com/schmidtwmark/BetterBlueKit")!) {
+                        Label("Client Source Code", systemImage: "apple.terminal")
+                    }
+                } header: {
+                    Text("About")
+                }
+
+                Section {
                     Link(destination: URL(string: "https://apps.apple.com/qa/developer/mark-schmidt/id1502505700")!) {
                         Label("My Other Apps", systemImage: "storefront")
                     }
+                } header: {
+                    Text("Shameless Self Promotion")
+                } footer: {
+                    if let mailLink = try? AttributedString(markdown: "Created by [Mark Schmidt](https://markschmidt.io)") {
+                        Text(mailLink)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
                 }
             }
             .navigationTitle("Settings")

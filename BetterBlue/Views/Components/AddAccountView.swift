@@ -115,9 +115,18 @@ struct AddAccountView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 } else {
-                    Text("BetterBlue requires an active Hyundai BlueLink or Kia Connect subscription.")
-                    Text("BetterBlue stores your credentials securely on your device and in iCloud.")
-                    Text("BetterBlue is fully open source. To view the source code, visit INSERT LINK HERE")
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("BetterBlue requires an active Hyundai BlueLink or Kia Connect subscription.")
+                        Text("BetterBlue stores your credentials securely on your device and in iCloud.")
+
+                        let link = "[GitHub](https://github.com/schmidtwmark/BetterBlue)"
+                          if let openSourceString = try? AttributedString(
+                              markdown: "BetterBlue is fully open source. To view the source code, visit \(link).") {
+                              Text(openSourceString)
+                          }
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
                 }
             }
 
