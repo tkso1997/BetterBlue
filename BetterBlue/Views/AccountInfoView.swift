@@ -48,6 +48,13 @@ struct AccountInfoView: View {
                     Text(account.brandEnum.displayName)
                         .foregroundColor(.secondary)
                 }
+
+                HStack {
+                    Text("Region")
+                    Spacer()
+                    Text(account.regionEnum.rawValue)
+                        .foregroundColor(.secondary)
+                }
             } header: {
                 Text("Account Info")
             }

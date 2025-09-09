@@ -176,7 +176,8 @@ struct SettingsView: View {
                 } header: {
                     Text("Shameless Self Promotion")
                 } footer: {
-                    if let mailLink = try? AttributedString(markdown: "Created by [Mark Schmidt](https://markschmidt.io)") {
+                    let link = "[Mark Schmidt](https://markschmidt.io)"
+                    if let mailLink = try? AttributedString(markdown: "Created by \(link)") {
                         Text(mailLink)
                             .font(.caption)
                             .foregroundColor(.secondary)
