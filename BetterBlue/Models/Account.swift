@@ -73,6 +73,7 @@ extension BBAccount {
                 pin: pin,
                 accountId: id,
                 modelContext: modelContext,
+                logSink: HTTPLogSinkManager.shared.createLogSink()
             )
             api = createAPIClient(configuration: configuration)
         }

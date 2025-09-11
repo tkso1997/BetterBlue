@@ -18,26 +18,13 @@ extension Notification.Name {
 
 @main
 struct BetterBlueApp: App {
-    static var httpLogSink: HTTPLogSink?
-
     var sharedModelContainer: ModelContainer = {
         do {
             let container = try createSharedModelContainer()
 
-            // Set up global HTTPLogSink for the app
-            BetterBlueApp.httpLogSink = { @Sendable httpLog in
-                Task { @MainActor in
-                    let context = container.mainContext
-                    let bbHttpLog = BBHTTPLog(log: httpLog)
-                    context.insert(bbHttpLog)
-
-                    do {
-                        try context.save()
-                    } catch {
-                        print("🔴 [HTTPLog] Failed to save HTTP log: \(error)")
-                    }
-                }
-            }
+            // Configure the HTTP log sink manager with auto-detected device type
+            let deviceType = HTTPLogSinkManager.detectMainAppDeviceType()
+            HTTPLogSinkManager.shared.configure(with: container, deviceType: deviceType)
 
             return container
         } catch {

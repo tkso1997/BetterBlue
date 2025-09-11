@@ -31,10 +31,8 @@ struct SettingsView: View {
     @State private var appSettings = AppSettings.shared
 
     // Debug functionality - only in debug builds
-    #if DEBUG
-        @State private var showingClearDataAlert = false
-        @State private var clearDataResult: String?
-    #endif
+    @State private var showingClearDataAlert = false
+    @State private var clearDataResult: String?
 
     var body: some View {
         NavigationView {
@@ -121,11 +119,15 @@ struct SettingsView: View {
                     Text("Units")
                 }
 
-                // Debug settings for map centering (only in debug builds)
-                #if DEBUG
                     Section {
+#if DEBUG
                         NavigationLink("Map Centering Debug") {
                             MapCenteringDebugView()
+                        }
+
+#endif
+                        NavigationLink("HTTP Logs") {
+                            HTTPLogView()
                         }
 
                         Button("Clear All Data") {
@@ -141,7 +143,6 @@ struct SettingsView: View {
                     } header: {
                         Text("Debug Settings")
                     }
-                #endif
 
                 // About section with version and GitHub links
                 Section {
@@ -194,7 +195,6 @@ struct SettingsView: View {
                 }
             }
         }
-        #if DEBUG
         .alert("Clear All Data", isPresented: $showingClearDataAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Clear All", role: .destructive) {
@@ -206,7 +206,6 @@ struct SettingsView: View {
                         "configurations, and other app data. This action cannot be undone.",
                 )
             }
-        #endif
     }
 
     private func deleteAccounts(offsets: IndexSet) {
@@ -247,42 +246,39 @@ struct SettingsView: View {
         }
     }
 
-    // Debug functionality - only in debug builds
-    #if DEBUG
-        private func clearAllData() {
-            do {
-                // Delete all BBAccounts (which should cascade delete their vehicles due to .cascade relationship)
-                try modelContext.delete(model: BBAccount.self)
-
-                // Delete any orphaned BBVehicles that might still exist
-                try modelContext.delete(model: BBVehicle.self)
-
-                // Delete any orphaned climate presets
-                try modelContext.delete(model: ClimatePreset.self)
-
-                // Delete any HTTP logs
-                try modelContext.delete(model: BBHTTPLog.self)
-
-                try modelContext.save()
-
-                clearDataResult = "✅ All data cleared successfully"
-                print("🧹 [SettingsView] Successfully cleared all SwiftData storage")
-
-                // Clear the result message after 3 seconds
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                    clearDataResult = nil
-                }
-            } catch {
-                clearDataResult = "❌ Error: \(error.localizedDescription)"
-                print("🔴 [SettingsView] Failed to clear data: \(error)")
-
-                // Clear the error message after 5 seconds
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                    clearDataResult = nil
-                }
+    private func clearAllData() {
+        do {
+            // Delete all BBAccounts (which should cascade delete their vehicles due to .cascade relationship)
+            try modelContext.delete(model: BBAccount.self)
+            
+            // Delete any orphaned BBVehicles that might still exist
+            try modelContext.delete(model: BBVehicle.self)
+            
+            // Delete any orphaned climate presets
+            try modelContext.delete(model: ClimatePreset.self)
+            
+            // Delete any HTTP logs
+            try modelContext.delete(model: BBHTTPLog.self)
+            
+            try modelContext.save()
+            
+            clearDataResult = "✅ All data cleared successfully"
+            print("🧹 [SettingsView] Successfully cleared all SwiftData storage")
+            
+            // Clear the result message after 3 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                clearDataResult = nil
+            }
+        } catch {
+            clearDataResult = "❌ Error: \(error.localizedDescription)"
+            print("🔴 [SettingsView] Failed to clear data: \(error)")
+            
+            // Clear the error message after 5 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                clearDataResult = nil
             }
         }
-    #endif
+    }
 }
 
 #Preview {

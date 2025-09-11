@@ -19,6 +19,10 @@ struct BetterBlueWatch_Watch_AppApp: App {
     var sharedModelContainer: ModelContainer = {
         do {
             let container = try createSharedModelContainer()
+
+            // Configure the HTTP log sink manager for watch
+            HTTPLogSinkManager.shared.configure(with: container, deviceType: .watch)
+
             print("✅ [WatchApp] Created shared ModelContainer")
             return container
         } catch {

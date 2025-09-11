@@ -40,49 +40,142 @@ struct ShareSheet: UIViewControllerRepresentable {
 
 struct HTTPLogFilterSheet: View {
     @Binding var selectedRequestTypes: Set<HTTPRequestType>
+    @Binding var selectedDeviceTypes: Set<DeviceType>
+    @Binding var selectedAccountIds: Set<UUID>
+    let allAccounts: [BBAccount]
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(HTTPRequestType.allCases, id: \.self) { requestType in
-                    Button {
-                        if selectedRequestTypes.contains(requestType) {
-                            selectedRequestTypes.remove(requestType)
-                        } else {
-                            selectedRequestTypes.insert(requestType)
+                Section {
+                    ForEach(HTTPRequestType.allCases, id: \.self) { requestType in
+                        Button {
+                            if selectedRequestTypes.contains(requestType) {
+                                selectedRequestTypes.remove(requestType)
+                            } else {
+                                selectedRequestTypes.insert(requestType)
+                            }
+                        } label: {
+                            HStack {
+                                Image(
+                                    systemName: selectedRequestTypes.contains(requestType) ?
+                                        "checkmark.square.fill" : "square",
+                                )
+                                .foregroundColor(selectedRequestTypes.contains(requestType) ? .accentColor : .secondary)
+                                Text(requestType.displayName)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
                         }
-                    } label: {
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                } header: {
+                    HStack {
+                        Text("Request Types")
+                        Spacer()
+                        Button("All") {
+                            selectedRequestTypes = Set(HTTPRequestType.allCases)
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        Button("None") {
+                            selectedRequestTypes = []
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    }
+                }
+
+                Section {
+                    ForEach(DeviceType.allCases, id: \.self) { deviceType in
+                        Button {
+                            if selectedDeviceTypes.contains(deviceType) {
+                                selectedDeviceTypes.remove(deviceType)
+                            } else {
+                                selectedDeviceTypes.insert(deviceType)
+                            }
+                        } label: {
+                            HStack {
+                                Image(
+                                    systemName: selectedDeviceTypes.contains(deviceType) ?
+                                        "checkmark.square.fill" : "square",
+                                )
+                                .foregroundColor(selectedDeviceTypes.contains(deviceType) ? .accentColor : .secondary)
+                                Text(deviceType.displayName)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                            }
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                } header: {
+                    HStack {
+                        Text("Device Types")
+                        Spacer()
+                        Button("All") {
+                            selectedDeviceTypes = Set(DeviceType.allCases)
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                        Button("None") {
+                            selectedDeviceTypes = []
+                        }
+                        .font(.caption)
+                        .foregroundColor(.blue)
+                    }
+                }
+
+                if !allAccounts.isEmpty {
+                    Section {
+                        ForEach(allAccounts) { account in
+                            Button {
+                                if selectedAccountIds.contains(account.id) {
+                                    selectedAccountIds.remove(account.id)
+                                } else {
+                                    selectedAccountIds.insert(account.id)
+                                }
+                            } label: {
+                                HStack {
+                                    Image(
+                                        systemName: selectedAccountIds.contains(account.id) ?
+                                            "checkmark.square.fill" : "square",
+                                    )
+                                    .foregroundColor(
+                                        selectedAccountIds.contains(account.id) ? .accentColor : .secondary)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(account.username)
+                                            .foregroundColor(.primary)
+                                        Text(account.brandEnum.displayName)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    } header: {
                         HStack {
-                            Image(
-                                systemName: selectedRequestTypes.contains(requestType) ?
-                                    "checkmark.square.fill" : "square",
-                            )
-                            .foregroundColor(selectedRequestTypes.contains(requestType) ? .accentColor : .secondary)
-                            Text(requestType.displayName)
-                                .foregroundColor(.primary)
+                            Text("Accounts")
                             Spacer()
+                            Button("All") {
+                                selectedAccountIds = Set(allAccounts.map(\.id))
+                            }
+                            .font(.caption)
+                            .foregroundColor(.blue)
+                            Button("None") {
+                                selectedAccountIds = []
+                            }
+                            .font(.caption)
+                            .foregroundColor(.blue)
                         }
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
             }
             .navigationTitle("Filter Logs")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(
-                        selectedRequestTypes.count == HTTPRequestType.allCases.count ?
-                            "Deselect All" : "Select All",
-                    ) {
-                        if selectedRequestTypes.count == HTTPRequestType.allCases.count {
-                            selectedRequestTypes.removeAll()
-                        } else {
-                            selectedRequestTypes = Set(HTTPRequestType.allCases)
-                        }
-                    }
-                }
-
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
                         dismiss()

@@ -69,6 +69,12 @@ struct VehicleTimelineProvider: AppIntentTimelineProvider {
     private func refreshVehicleData(for configuration: VehicleWidgetIntent) async -> VehicleEntity? {
         do {
             let modelContainer = try createSharedModelContainer()
+
+            // Configure the HTTP log sink manager for widget
+            await MainActor.run {
+                HTTPLogSinkManager.shared.configure(with: modelContainer, deviceType: .widget)
+            }
+
             let context = ModelContext(modelContainer)
 
             // Get the target vehicle
@@ -114,6 +120,12 @@ struct VehicleTimelineProvider: AppIntentTimelineProvider {
             // Fall back to cached data
             do {
                 let modelContainer = try createSharedModelContainer()
+
+                // Configure the HTTP log sink manager for widget fallback
+                await MainActor.run {
+                    HTTPLogSinkManager.shared.configure(with: modelContainer, deviceType: .widget)
+                }
+
                 let context = ModelContext(modelContainer)
                 return await getVehicleEntityFromContext(for: configuration, context: context)
             } catch {

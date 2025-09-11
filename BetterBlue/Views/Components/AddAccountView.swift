@@ -232,7 +232,7 @@ struct AddAccountView: View {
                 password: password,
                 pin: pin,
                 brand: selectedBrand,
-                region: selectedRegion,
+                region: selectedRegion
             )
             try await bbAccount.initialize(modelContext: modelContext)
             modelContext.insert(bbAccount)

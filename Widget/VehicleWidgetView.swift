@@ -91,14 +91,6 @@ struct UnifiedVehicleWidget: View {
 
             // Action buttons
             VehicleButtonsView(vehicle: vehicle, isSmall: isSmall)
-
-            #if DEBUG
-
-            Text(formatLastUpdated(vehicle.timestamp))
-                .font(.caption)
-                .padding(.top, 8)
-
-            #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 16)

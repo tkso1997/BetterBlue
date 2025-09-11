@@ -10,47 +10,49 @@ import SwiftData
 import SwiftUI
 
 struct HTTPLogView: View {
-    let accountId: UUID
+    let accountId: UUID?
     var transition: Namespace.ID?
     @Environment(\.modelContext) private var modelContext
-    @Query private var allLogs: [BBHTTPLog]
+    @Query(sort: [SortDescriptor(\BBHTTPLog.log.timestamp, order: .reverse)]) private var allLogs: [BBHTTPLog]
+    @Query private var allAccounts: [BBAccount]
     @State private var selectedRequestTypes: Set<HTTPRequestType> = Set(HTTPRequestType.allCases)
+    @State private var selectedDeviceTypes: Set<DeviceType> = Set(DeviceType.allCases)
+    @State private var selectedAccountIds: Set<UUID> = []
     @State private var showingFilterSheet = false
     @Namespace private var fallbackTransition
 
-    init(accountId: UUID, transition: Namespace.ID? = nil) {
+    init(accountId: UUID? = nil, transition: Namespace.ID? = nil) {
         self.accountId = accountId
         self.transition = transition
-        // Query for logs belonging to this account, sorted by timestamp descending
-        _allLogs = Query(
-            filter: #Predicate<BBHTTPLog> { bbLog in
-                bbLog.log.accountId == accountId
-            },
-            sort: [SortDescriptor(\BBHTTPLog.log.timestamp, order: .reverse)],
-        )
     }
 
-    var accountLogs: [HTTPLog] {
-        allLogs
-            .map(\.log)
-            .filter { selectedRequestTypes.contains($0.requestType) }
+    var filteredLogs: [BBHTTPLog] {
+        allLogs.filter { bbLog in
+            let requestTypeMatch = selectedRequestTypes.contains(bbLog.log.requestType)
+            let deviceTypeMatch = selectedDeviceTypes.contains(bbLog.deviceType)
+            let accountMatch = selectedAccountIds.isEmpty || selectedAccountIds.contains(bbLog.log.accountId)
+
+            return requestTypeMatch && deviceTypeMatch && accountMatch
+        }
     }
 
     var body: some View {
         List {
-            if accountLogs.isEmpty {
+            if filteredLogs.isEmpty {
                 ContentUnavailableView(
                     "No HTTP Logs",
                     systemImage: "network.slash",
-                    description: Text("HTTP requests will appear here when made by this account."),
+                    description: Text(accountId != nil ?
+                        "HTTP requests will appear here when made by this account." :
+                        "HTTP requests will appear here when made by any account."),
                 )
                 .listRowBackground(Color.clear)
             } else {
-                ForEach(accountLogs, id: \.id) { log in
+                ForEach(filteredLogs, id: \.log.id) { bbLog in
                     NavigationLink(
-                        destination: HTTPLogDetailView(log: log, transition: transition ?? fallbackTransition),
+                        destination: HTTPLogDetailView(log: bbLog.log, transition: transition ?? fallbackTransition),
                     ) {
-                        HTTPLogRowView(log: log)
+                        HTTPLogRowView(bbLog: bbLog)
                     }
                 }
             }
@@ -72,7 +74,18 @@ struct HTTPLogView: View {
             }
         }
         .sheet(isPresented: $showingFilterSheet) {
-            HTTPLogFilterSheet(selectedRequestTypes: $selectedRequestTypes)
+            HTTPLogFilterSheet(
+                selectedRequestTypes: $selectedRequestTypes,
+                selectedDeviceTypes: $selectedDeviceTypes,
+                selectedAccountIds: $selectedAccountIds,
+                allAccounts: allAccounts
+            )
+        }
+        .onAppear {
+            // If opened for a specific account, pre-filter to that account
+            if let accountId = accountId, selectedAccountIds.isEmpty {
+                selectedAccountIds = [accountId]
+            }
         }
     }
 
@@ -85,11 +98,16 @@ struct HTTPLogView: View {
 }
 
 struct HTTPLogRowView: View {
-    let log: HTTPLog
+    let bbLog: BBHTTPLog
+
+    var log: HTTPLog {
+        bbLog.log
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
+
                 // Request Type Badge
                 Text(log.requestType.displayName)
                     .font(.caption)
@@ -108,6 +126,8 @@ struct HTTPLogRowView: View {
                     .foregroundColor(.primary)
                     .cornerRadius(4)
 
+                Spacer()
+
                 // Status Code Badge
                 Text(log.responseStatus?.description ?? "Unknown")
                     .font(.caption)
@@ -117,8 +137,6 @@ struct HTTPLogRowView: View {
                     .background(statusColor.opacity(0.2))
                     .foregroundColor(statusColor)
                     .cornerRadius(4)
-
-                Spacer()
 
                 // Timestamp
                 Text(DateFormatter.timeOnlyFormatter.string(from: log.timestamp))
@@ -143,6 +161,14 @@ struct HTTPLogRowView: View {
                     .foregroundColor(.secondary)
 
                 Spacer()
+                // Device Type Badge
+                Text(bbLog.deviceType.displayName)
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(Color.blue.opacity(0.15))
+                    .foregroundColor(.blue)
+                    .cornerRadius(4)
 
                 // Error indicator
                 if log.error != nil {
@@ -261,8 +287,9 @@ private extension DateFormatter {
             ]
 
             // Insert sample logs into the context
-            for log in sampleLogs {
-                let bbLog = BBHTTPLog(log: log)
+            for (index, log) in sampleLogs.enumerated() {
+                let deviceType: DeviceType = [.iPhone, .iPad, .mac, .widget, .watch][index % 5]
+                let bbLog = BBHTTPLog(log: log, deviceType: deviceType)
                 context.insert(bbLog)
             }
 

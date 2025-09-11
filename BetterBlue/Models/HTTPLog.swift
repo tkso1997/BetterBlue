@@ -8,6 +8,24 @@ import BetterBlueKit
 import Foundation
 import SwiftData
 
+enum DeviceType: String, Codable, CaseIterable {
+    case iPhone = "iPhone"
+    case iPad = "iPad"
+    case mac = "Mac"
+    case widget = "Widget"
+    case watch = "Watch"
+
+    var displayName: String {
+        switch self {
+        case .iPhone: return "iPhone"
+        case .iPad: return "iPad"
+        case .mac: return "Mac"
+        case .widget: return "Widget"
+        case .watch: return "Watch"
+        }
+    }
+}
+
 @Model
 class BBHTTPLog {
     var log: HTTPLog = HTTPLog(
@@ -25,7 +43,10 @@ class BBHTTPLog {
         duration: 0,
     )
 
-    init(log: HTTPLog) {
+    var deviceType: DeviceType = DeviceType.iPhone
+
+    init(log: HTTPLog, deviceType: DeviceType = DeviceType.iPhone) {
         self.log = log
+        self.deviceType = deviceType
     }
 }

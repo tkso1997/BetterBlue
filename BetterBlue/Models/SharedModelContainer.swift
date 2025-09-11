@@ -38,26 +38,7 @@ func getAppGroupStoreURL() throws -> URL {
     }
 }
 
-/// Creates a shared ModelContainer for use across main app, widget, and watch app
-func createSharedModelContainer() throws -> ModelContainer {
-    let schema = Schema([
-        BBAccount.self,
-        BBVehicle.self,
-        BBHTTPLog.self,
-        ClimatePreset.self
-    ], version: .init(1, 0, 6))
-
-    let storeURL: URL
-
-    #if targetEnvironment(simulator)
-        storeURL = getSimulatorStoreURL()
-        print("📱 [BetterBlue] Using shared temp storage at: \(storeURL)")
-    #else
-        // On device, try App Group container first, with better error handling
-        storeURL = try getAppGroupStoreURL()
-        print("✅ [BetterBlue] Using App Group container: \(storeURL)")
-    #endif
-
+func createContainer(storeURL: URL, schema: Schema) throws -> ModelContainer {
     do {
         let modelConfiguration = ModelConfiguration(url: storeURL, cloudKitDatabase: .automatic)
         return try ModelContainer(for: schema, configurations: [modelConfiguration])
@@ -74,4 +55,34 @@ func createSharedModelContainer() throws -> ModelContainer {
             ],
         )
     }
+}
+
+/// Creates a shared ModelContainer for use across main app, widget, and watch app
+func createSharedModelContainer() throws -> ModelContainer {
+    let schema = Schema([
+        BBAccount.self,
+        BBVehicle.self,
+        BBHTTPLog.self,
+        ClimatePreset.self
+    ], version: .init(1, 0, 6))
+
+    #if targetEnvironment(simulator)
+        let storeURL = getSimulatorStoreURL()
+        return try createContainer(storeURL: storeURL, schema: schema)
+    #else
+        if let cloudContainer = try? ModelContainer(
+            for: BBAccount.self,
+            BBVehicle.self,
+            BBHTTPLog.self,
+            ClimatePreset.self,
+            configurations: .init(
+                "iCloud.com.markschmidt.BetterBlue"
+            )
+        ) {
+            return cloudContainer
+        }
+        let storeURL = try getAppGroupStoreURL()
+        return try createContainer(storeURL: storeURL, schema: schema)
+    #endif
+
 }
