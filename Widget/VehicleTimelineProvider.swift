@@ -98,16 +98,20 @@ struct VehicleTimelineProvider: AppIntentTimelineProvider {
             }
 
             let vehicleName = bbVehicle.displayName
-            print("🔄 [Widget] Refreshing vehicle status for \(vehicleName)")
+            let lastUpdated = bbVehicle.lastUpdated ?? Date.distantPast
+            let timeSinceLastUpdate = Date().timeIntervalSince(lastUpdated)
+            let thirtyMinutesInSeconds: TimeInterval = 30 * 60
 
-            // Refresh vehicle status
-            try await account.fetchAndUpdateVehicleStatus(for: bbVehicle, modelContext: context)
-//            await MainActor.run {
-//                bbVehicle.updateStatus(with: status)
-//            }
-//            try context.save()
+            if timeSinceLastUpdate < thirtyMinutesInSeconds {
+                print("📱 [Widget] Using fresh data for \(vehicleName) (updated \(Int(timeSinceLastUpdate/60))m ago)")
+            } else {
+                print("🔄 [Widget] Refreshing stale vehicle status for \(vehicleName) (last updated \(Int(timeSinceLastUpdate/60))m ago)")
 
-            print("✅ [Widget] Successfully refreshed \(vehicleName)")
+                // Refresh vehicle status only if data is stale
+                try await account.fetchAndUpdateVehicleStatus(for: bbVehicle, modelContext: context)
+
+                print("✅ [Widget] Successfully refreshed \(vehicleName)")
+            }
 
             // Create vehicle entity on the main actor to avoid capture issues
             let unit = await MainActor.run { AppSettings.shared.preferredDistanceUnit }

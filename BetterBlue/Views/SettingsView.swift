@@ -250,21 +250,21 @@ struct SettingsView: View {
         do {
             // Delete all BBAccounts (which should cascade delete their vehicles due to .cascade relationship)
             try modelContext.delete(model: BBAccount.self)
-            
+
             // Delete any orphaned BBVehicles that might still exist
             try modelContext.delete(model: BBVehicle.self)
-            
+
             // Delete any orphaned climate presets
             try modelContext.delete(model: ClimatePreset.self)
-            
+
             // Delete any HTTP logs
             try modelContext.delete(model: BBHTTPLog.self)
-            
+
             try modelContext.save()
-            
+
             clearDataResult = "✅ All data cleared successfully"
             print("🧹 [SettingsView] Successfully cleared all SwiftData storage")
-            
+
             // Clear the result message after 3 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 clearDataResult = nil
@@ -272,7 +272,7 @@ struct SettingsView: View {
         } catch {
             clearDataResult = "❌ Error: \(error.localizedDescription)"
             print("🔴 [SettingsView] Failed to clear data: \(error)")
-            
+
             // Clear the error message after 5 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
                 clearDataResult = nil

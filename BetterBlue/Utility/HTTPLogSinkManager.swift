@@ -41,10 +41,32 @@ class HTTPLogSinkManager {
 
                 do {
                     try context.save()
+
+                    // Clean up old logs to maintain a soft limit of 100 logs
+                    try await self.cleanupOldLogs(context: context)
                 } catch {
                     print("🔴 [HTTPLog] Failed to save HTTP log: \(error)")
                 }
             }
+        }
+    }
+
+    private func cleanupOldLogs(context: ModelContext) async throws {
+        let logCountDescriptor = FetchDescriptor<BBHTTPLog>()
+        let allLogs = try context.fetch(logCountDescriptor)
+
+        let maxLogs = 100
+        if allLogs.count > maxLogs {
+            // Sort logs by timestamp (oldest first) and get the excess logs to delete
+            let sortedLogs = allLogs.sorted { $0.log.timestamp < $1.log.timestamp }
+            let logsToDelete = sortedLogs.prefix(allLogs.count - maxLogs)
+
+            for logToDelete in logsToDelete {
+                context.delete(logToDelete)
+            }
+
+            try context.save()
+            print("🧹 [HTTPLog] Cleaned up \(logsToDelete.count) old logs (keeping \(maxLogs) most recent)")
         }
     }
 
