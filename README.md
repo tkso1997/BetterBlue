@@ -1,5 +1,22 @@
 # BetterBlue
 
+<p align="center">
+  <img src="betterblue-phones.png" alt="BetterBlue on iPhone" width="400"/>
+  <img src="betterblue-watch.png" alt="BetterBlue on Apple Watch" width="200"/>
+</p>
+
+<p align="left">
+<a href="https://testflight.apple.com/join/n7NRXTWb">
+<img src="https://img.shields.io/badge/Install-Testflight-blue?style=for-the-badge" alt="Download on TestFlight" width="200"/>
+</a>
+</p>
+
+<p align="left">
+<a href="https://markschmidt.io/betterblue">
+<img src="https://img.shields.io/badge/Learn%20More-Visit%20Website-blue?style=for-the-badge" alt="Visit Website" width="200"/>
+</a>
+</p>
+
 A modern iOS app for controlling your Hyundai or Kia vehicle using BlueLink and Kia Connect services. Built with SwiftUI and powered by [BetterBlueKit](./BetterBlueKit/).
 
 ## Features
