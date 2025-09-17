@@ -7,7 +7,6 @@
 
 import BetterBlueKit
 import Foundation
-import MapKit
 import SwiftData
 import SwiftUI
 
@@ -271,17 +270,26 @@ extension BBVehicle {
         BackgroundOption(
             name: "default",
             displayName: "Default",
-            gradient: [Color.gray.opacity(0.1), Color.gray.opacity(0.05)],
+            gradient: [
+                Color(red: 0.93, green: 0.93, blue: 0.93),
+                Color(red: 0.97, green: 0.97, blue: 0.97)
+            ],
         ),
         BackgroundOption(
             name: "black",
             displayName: "Black",
-            gradient: [Color.black.opacity(0.8), Color.black.opacity(0.4)],
+            gradient: [
+                Color(red: 0.2, green: 0.2, blue: 0.2),
+                Color(red: 0.4, green: 0.4, blue: 0.4)
+            ],
         ),
         BackgroundOption(
             name: "gray",
             displayName: "Gray",
-            gradient: [Color.gray.opacity(0.6), Color.gray.opacity(0.3)],
+            gradient: [
+                Color(red: 0.6, green: 0.6, blue: 0.6),
+                Color(red: 0.75, green: 0.75, blue: 0.75)
+            ],
         ),
         BackgroundOption(
             name: "silver",
@@ -294,27 +302,42 @@ extension BBVehicle {
         BackgroundOption(
             name: "darkBlue",
             displayName: "Dark Blue",
-            gradient: [Color.blue.opacity(0.7), Color.blue.opacity(0.4)],
+            gradient: [
+                Color(red: 0.2, green: 0.3, blue: 0.7),
+                Color(red: 0.4, green: 0.5, blue: 0.8)
+            ],
         ),
         BackgroundOption(
             name: "lightBlue",
             displayName: "Light Blue",
-            gradient: [Color.blue.opacity(0.4), Color.blue.opacity(0.2)],
+            gradient: [
+                Color(red: 0.6, green: 0.8, blue: 1.0),
+                Color(red: 0.8, green: 0.9, blue: 1.0)
+            ],
         ),
         BackgroundOption(
             name: "darkGreen",
             displayName: "Dark Green",
-            gradient: [Color.green.opacity(0.7), Color.green.opacity(0.4)],
+            gradient: [
+                Color(red: 0.2, green: 0.7, blue: 0.3),
+                Color(red: 0.4, green: 0.8, blue: 0.5)
+            ],
         ),
         BackgroundOption(
             name: "red",
             displayName: "Red",
-            gradient: [Color.red.opacity(0.6), Color.red.opacity(0.3)],
+            gradient: [
+                Color(red: 0.8, green: 0.2, blue: 0.2),
+                Color(red: 0.9, green: 0.4, blue: 0.4)
+            ],
         ),
         BackgroundOption(
             name: "white",
             displayName: "White",
-            gradient: [Color.white.opacity(0.9), Color.white.opacity(0.6)],
+            gradient: [
+                Color(red: 0.95, green: 0.95, blue: 0.95),
+                Color(red: 0.98, green: 0.98, blue: 0.98)
+            ],
         )
     ]
 
@@ -334,30 +357,5 @@ extension BBVehicle {
             return Self.availableBackgrounds[0].gradient
         }
         return background.gradient
-    }
-}
-
-// MARK: - Utility Methods
-
-extension BBVehicle {
-    var coordinate: CLLocationCoordinate2D? {
-        guard let location else { return nil }
-        return CLLocationCoordinate2D(
-            latitude: location.latitude,
-            longitude: location.longitude,
-        )
-    }
-
-    func toVehicle() -> Vehicle {
-        Vehicle(
-            vin: vin,
-            regId: regId,
-            model: model,
-            accountId: accountId,
-            isElectric: isElectric,
-            generation: generation,
-            odometer: odometer,
-            vehicleKey: vehicleKey,
-        )
     }
 }

@@ -195,12 +195,12 @@ struct VehicleButtonsView: View {
 
     var buttonData: [VehicleButtonData] {
         [
-            VehicleButtonData(label: "Lock", shortLabel: "Lock", icon: "lock.fill", color: .green, intent: {
+            VehicleButtonData(label: "Lock", shortLabel: "Lock", icon: "lock.fill", color: .red, intent: {
                 let intent = LockVehicleIntent()
                 intent.vehicle = vehicle
                 return intent
             }),
-            VehicleButtonData(label: "Unlock", shortLabel: "Unlock", icon: "lock.open.fill", color: .red, intent: {
+            VehicleButtonData(label: "Unlock", shortLabel: "Unlock", icon: "lock.open.fill", color: .green, intent: {
                 let intent = UnlockVehicleIntent()
                 intent.vehicle = vehicle
                 return intent

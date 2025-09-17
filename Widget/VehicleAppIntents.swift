@@ -106,6 +106,7 @@ struct StartClimateIntent: AppIntent {
             let vehicleName = vehicle.displayName
 
             try await performVehicleActionWithVin(targetVin) { bbVehicle, account, context in
+                print("Starting climate from intent, options: \(bbVehicle.safeClimatePresets)")
                 try await account.startClimate(bbVehicle, modelContext: context)
             }
 
@@ -198,11 +199,67 @@ struct GetVehicleStatusIntent: AppIntent {
 
     init() {}
 
+    @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let lockStatus = vehicle.vin.contains("locked") ? "locked" : "unlocked" // This would need actual status
-        let rangeInfo = vehicle.rangeText
+        let modelContainer = try createSharedModelContainer()
+        let context = ModelContext(modelContainer)
 
-        return .result(dialog: "\(vehicle.displayName) is \(lockStatus). Range: \(rangeInfo)")
+        let vehicles = try context.fetch(FetchDescriptor<BBVehicle>())
+
+        guard let bbVehicle = vehicles.first(where: { $0.vin == vehicle.vin }) else {
+            throw IntentError.vehicleNotFound
+        }
+
+        var statusComponents: [String] = []
+        
+        // Lock status
+        if let lockStatus = bbVehicle.lockStatus {
+            let lockText = lockStatus == .locked ? "locked" : "unlocked"
+            statusComponents.append("Vehicle is \(lockText)")
+        }
+        
+        // Range and battery/fuel information
+        statusComponents.append("Range: \(vehicle.rangeText)")
+        
+        // EV specific status
+        if bbVehicle.isElectric, let evStatus = bbVehicle.evStatus {
+            statusComponents.append("Battery: \(Int(evStatus.evRange.percentage))%")
+            
+            if evStatus.pluggedIn {
+                if evStatus.charging {
+                    if evStatus.chargeSpeed > 0 {
+                        statusComponents.append("Charging at \(evStatus.chargeSpeed) kW")
+                    } else {
+                        statusComponents.append("Plugged in and charging")
+                    }
+                } else {
+                    statusComponents.append("Plugged in but not charging")
+                }
+            }
+        } else if !bbVehicle.isElectric, let gasRange = bbVehicle.gasRange {
+            statusComponents.append("Fuel: \(Int(gasRange.percentage))%")
+        }
+        
+        // Climate status
+        if let climateStatus = bbVehicle.climateStatus {
+            if climateStatus.airControlOn {
+                statusComponents.append("Climate control is on")
+                statusComponents.append("Target temperature: \(climateStatus.temperature.value)°")
+            } else {
+                statusComponents.append("Climate control is off")
+            }
+        }
+        
+        // Last updated info
+        if let lastUpdated = bbVehicle.lastUpdated {
+            let formatter = RelativeDateTimeFormatter()
+            formatter.unitsStyle = .short
+            let timeText = formatter.localizedString(for: lastUpdated, relativeTo: Date())
+            statusComponents.append("Last updated \(timeText)")
+        }
+
+        let statusText = statusComponents.joined(separator: "\n")
+        return .result(dialog: IntentDialog(stringLiteral: statusText))
     }
 }
 
@@ -223,7 +280,7 @@ private func performVehicleActionWithVin(
     else {
         throw IntentError.vehicleNotFound
     }
-
+    
     try await action(vehicle, account, context)
 }
 

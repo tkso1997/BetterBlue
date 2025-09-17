@@ -70,6 +70,7 @@ extension ClimateSettingsSheet {
                 vehicleId: vehicle.id,
             )
             modelContext.insert(defaultPreset)
+            vehicle.climatePresets?.append(defaultPreset)
             try? modelContext.save()
         }
     }
@@ -86,6 +87,7 @@ extension ClimateSettingsSheet {
         let newIndex = vehiclePresets.count
         newPreset.sortOrder = newIndex
         modelContext.insert(newPreset)
+        vehicle.climatePresets?.append(newPreset)
         try? modelContext.save()
 
         // Select the new preset tab with animation after a short delay to ensure it's created
