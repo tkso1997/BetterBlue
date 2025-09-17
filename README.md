@@ -17,7 +17,7 @@
 </a>
 </p>
 
-A modern iOS app for controlling your Hyundai or Kia vehicle using BlueLink and Kia Connect services. Built with SwiftUI and powered by [BetterBlueKit](./BetterBlueKit/).
+A modern iOS app for controlling your Hyundai or Kia vehicle using BlueLink and Kia Connect services. Built with SwiftUI and powered by [BetterBlueKit](https://github.com/schmidtwmark/BetterBlueKit/tree/main).
 
 ## Features
 
