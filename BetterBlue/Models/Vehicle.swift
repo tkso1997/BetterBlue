@@ -91,10 +91,10 @@ extension BBVehicle {
         syncDate = status.syncDate
 
         // if gas range / ev status are empty, keep our existing values
-        if let gasRange = status.gasRange {
+        if let gasRange = status.gasRange, status.evStatus == nil {
             self.gasRange = gasRange
         }
-        if let evStatus = status.evStatus {
+        if let evStatus = status.evStatus, status.gasRange == nil {
             self.evStatus = evStatus
         }
         location = status.location

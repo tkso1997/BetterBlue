@@ -83,6 +83,9 @@ struct WatchMainView: View {
 }
 
 struct WatchEmptyStateView: View {
+    @Environment(\.modelContext) private var modelContext
+    @State private var showingDiagnostics = false
+
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: "car.fill")
@@ -97,8 +100,24 @@ struct WatchEmptyStateView: View {
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
+
+            Button {
+                showingDiagnostics = true
+            } label: {
+                HStack {
+                    Image(systemName: "info.circle")
+                    Text("Sync Info")
+                }
+                .font(.caption)
+                .foregroundColor(.blue)
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 8)
         }
         .padding()
+        .sheet(isPresented: $showingDiagnostics) {
+            DiagnosticInfoView()
+        }
     }
 }
 

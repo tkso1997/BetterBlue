@@ -211,20 +211,20 @@ struct GetVehicleStatusIntent: AppIntent {
         }
 
         var statusComponents: [String] = []
-        
+
         // Lock status
         if let lockStatus = bbVehicle.lockStatus {
             let lockText = lockStatus == .locked ? "locked" : "unlocked"
             statusComponents.append("Vehicle is \(lockText)")
         }
-        
+
         // Range and battery/fuel information
         statusComponents.append("Range: \(vehicle.rangeText)")
-        
+
         // EV specific status
         if bbVehicle.isElectric, let evStatus = bbVehicle.evStatus {
             statusComponents.append("Battery: \(Int(evStatus.evRange.percentage))%")
-            
+
             if evStatus.pluggedIn {
                 if evStatus.charging {
                     if evStatus.chargeSpeed > 0 {
@@ -239,7 +239,7 @@ struct GetVehicleStatusIntent: AppIntent {
         } else if !bbVehicle.isElectric, let gasRange = bbVehicle.gasRange {
             statusComponents.append("Fuel: \(Int(gasRange.percentage))%")
         }
-        
+
         // Climate status
         if let climateStatus = bbVehicle.climateStatus {
             if climateStatus.airControlOn {
@@ -249,7 +249,7 @@ struct GetVehicleStatusIntent: AppIntent {
                 statusComponents.append("Climate control is off")
             }
         }
-        
+
         // Last updated info
         if let lastUpdated = bbVehicle.lastUpdated {
             let formatter = RelativeDateTimeFormatter()
@@ -280,7 +280,7 @@ private func performVehicleActionWithVin(
     else {
         throw IntentError.vehicleNotFound
     }
-    
+
     try await action(vehicle, account, context)
 }
 

@@ -130,6 +130,10 @@ struct SettingsView: View {
                             HTTPLogView()
                         }
 
+                        NavigationLink("Sync Diagnostics") {
+                            DiagnosticInfoView()
+                        }
+
                         Button("Clear All Data") {
                             showingClearDataAlert = true
                         }

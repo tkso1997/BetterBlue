@@ -14,6 +14,7 @@ struct WatchVehicleSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var appSettings = AppSettings.shared
+    @State private var showingDiagnostics = false
 
     // Get the latest vehicle from the query
     @Query private var allVehicles: [BBVehicle]
@@ -65,6 +66,19 @@ struct WatchVehicleSettingsView: View {
                         .buttonStyle(.plain)
                     }
                 }
+
+                Section("Debug") {
+                    Button {
+                        showingDiagnostics = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "info.circle")
+                            Text("Sync Diagnostics")
+                        }
+                        .foregroundColor(.blue)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -74,6 +88,9 @@ struct WatchVehicleSettingsView: View {
                         dismiss()
                     }
                 }
+            }
+            .sheet(isPresented: $showingDiagnostics) {
+                DiagnosticInfoView()
             }
         }
     }
