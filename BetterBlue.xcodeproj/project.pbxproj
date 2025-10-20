@@ -801,7 +801,7 @@
 		};
 		ED70022E2E707C5F00C1CEEC /* XCRemoteSwiftPackageReference "BetterBlueKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/schmidtwmark/BetterBlueKit";
+			repositoryURL = "https://github.com/tkso1997/BetterBlueKit";
 			requirement = {
 				branch = main;
 				kind = branch;
